@@ -340,22 +340,23 @@ function renderPlay(p){
 function renderRead(p){
   const L=LESSONS[state.lesson];
   p.append(el("h2",{},"Read it"));
-  if(!L.words.length){
-    p.append(el("p",{class:"hint"},"Alif can't make a word on its own yet. Real words start in lesson 2."),
-             nextLessonBtn());
-    return;
-  }
-  p.append(el("p",{class:"hint"},"Try reading each word aloud first, then tap to check."));
+  // A lesson with no words yet reads its letters instead, in a mixed-up row.
+  const items = L.words.length
+    ? L.words.map(w=>({text:w.w, r:w.r, m:w.m, key:keyWord(w), say:w.w}))
+    : shuffle([...L.letters,...L.letters]).map(x=>({text:x.g, r:x.name, m:"letter", key:keyLetter(x), say:x.say}));
+  p.append(el("p",{class:"hint"}, L.words.length
+    ? "Try reading each word aloud first, then tap to check."
+    : "Say each letter aloud first, then tap Check to hear if you were right."));
   const grid=el("div",{class:"words"});
-  L.words.forEach(w=>{
+  items.forEach(w=>{
     const c=el("div",{class:"wcard"});
     const meaning=el("div",{class:"meaning"},"");
     const btns=el("div",{class:"small-btns"});
     const hear=el("button",{},"Hear it"); const check=el("button",{},"Check");
-    hear.onclick=()=>play(keyWord(w),w.w);
-    check.onclick=()=>{ if(!meaning.innerHTML){ addStar(); } meaning.innerHTML=`<b>${w.r}</b> · ${w.m}`; play(keyWord(w),w.w); };
+    hear.onclick=()=>play(w.key,w.say);
+    check.onclick=()=>{ if(!meaning.innerHTML){ addStar(); } meaning.innerHTML=`<b>${w.r}</b> · ${w.m}`; play(w.key,w.say); };
     btns.append(hear,check);
-    c.append(el("span",{class:"ur"},w.w),meaning,btns);
+    c.append(el("span",{class:"ur"},w.text),meaning,btns);
     grid.appendChild(c);
   });
   p.append(grid, nextLessonBtn());
