@@ -146,7 +146,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: lessons 1–4 (letters that never join forward). Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings.</p>
+  <p class="note">Prototype: lessons 1–4 (letters that never join forward). Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 13.</p>
 </div>
 
 <script>
@@ -216,21 +216,11 @@ function loadClip(key){
   return buffers[key];
 }
 function preloadLesson(i){
-  const L=LESSONS[i]; if(!L) return;
+  const L=LESSONS[i]; if(!L) return; loadClip("ding");
   L.letters.forEach(x=>{ loadClip(keyLetter(x)); loadClip(keyPic(x)); });
   L.words.forEach(w=>loadClip(keyWord(w)));
   // letters from earlier lessons appear in the game too
   LESSONS.slice(0,i).forEach(l=>l.letters.forEach(x=>loadClip(keyLetter(x))));
-}
-// A short two-note "ding" for a right answer, so no letter sound carries into the next question.
-function chime(){
-  const c=audioCtx(); if(!c) return;
-  [[880,0],[1320,0.12]].forEach(([f,t])=>{
-    const o=c.createOscillator(), g=c.createGain(), at=c.currentTime+t;
-    o.type="sine"; o.frequency.value=f; o.connect(g); g.connect(c.destination);
-    g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(0.25,at+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001,at+0.3); o.start(at); o.stop(at+0.32);
-  });
 }
 function stopAudio(){
   playToken++;
@@ -371,7 +361,7 @@ function renderPlay(p){
         let moved=false;
         const advance=()=>{ if(moved) return; moved=true; stopAudio();
           G.round++; if(G.round>=6){ state.step=3; state.game=null; } else G.cur=newRound(G.round); render(); };
-        stopAudio(); chime(); setTimeout(advance,700);
+        play("ding",""); setTimeout(advance,700);
       } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
         fb.className="feedback bad"; fb.textContent="Try again"; play(keyLetter(R.target),R.target.say); }
     };
