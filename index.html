@@ -196,15 +196,61 @@ if("speechSynthesis" in window){
    the device voice is only a fallback while files are missing. */
 const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>"pic-"+slug(x.pic.m), keyWord=w=>"word-"+(w.id||slug(w.r));
-let current=null;
-function stopAudio(){ try{ if(current){ current.onended=null; current.pause(); } if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
-function play(key,text,next){
-  let fell=false; const fallback=()=>{ if(!fell){ fell=true; speak(text); if(next) setTimeout(next,1300); } };
-  try{ if(current){ current.pause(); } if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
-  const a=new Audio("audio/"+key+".mp3"); current=a;
-  a.onerror=fallback; if(next) a.onended=()=>{ if(current===a) next(); };
-  const pr=a.play(); if(pr&&pr.catch) pr.catch(fallback);
+/* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
+   Web Audio also keeps playing allowed on phones after the first tap. */
+let ctx=null, current=null, playToken=0;
+const buffers={};   // key -> Promise<AudioBuffer|null>
+// On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
+try{ if(navigator.audioSession) navigator.audioSession.type="playback"; }catch(e){}
+function audioCtx(){
+  if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(AC) ctx=new AC(); }
+  if(ctx && ctx.state==="suspended") ctx.resume().catch(()=>{});
+  return ctx;
 }
+function loadClip(key){
+  if(!buffers[key]) buffers[key]=fetch("audio/"+key+".mp3")
+    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(data=>{ const c=audioCtx(); if(!c) return null;
+      return new Promise((ok,bad)=>{ const pr=c.decodeAudioData(data,ok,bad); if(pr&&pr.then) pr.then(ok,bad); }); })
+    .catch(()=>{ delete buffers[key]; return null; });
+  return buffers[key];
+}
+function preloadLesson(i){
+  const L=LESSONS[i]; if(!L) return;
+  L.letters.forEach(x=>{ loadClip(keyLetter(x)); loadClip(keyPic(x)); });
+  L.words.forEach(w=>loadClip(keyWord(w)));
+  // letters from earlier lessons appear in the game too
+  LESSONS.slice(0,i).forEach(l=>l.letters.forEach(x=>loadClip(keyLetter(x))));
+}
+// A short two-note "ding" for a right answer, so no letter sound carries into the next question.
+function chime(){
+  const c=audioCtx(); if(!c) return;
+  [[880,0],[1320,0.12]].forEach(([f,t])=>{
+    const o=c.createOscillator(), g=c.createGain(), at=c.currentTime+t;
+    o.type="sine"; o.frequency.value=f; o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(0.25,at+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,at+0.3); o.start(at); o.stop(at+0.32);
+  });
+}
+function stopAudio(){
+  playToken++;
+  try{ if(current){ current.onended=null; current.stop(); } }catch(e){}
+  current=null;
+  try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
+}
+function play(key,text,next){
+  stopAudio(); const token=playToken; audioCtx();
+  loadClip(key).then(buf=>{
+    if(token!==playToken) return;            // something newer was asked for
+    const c=audioCtx();
+    if(!buf||!c){ speak(text); if(next) setTimeout(()=>{ if(token===playToken) next(); },1300); return; }
+    const src=c.createBufferSource(); src.buffer=buf; src.connect(c.destination);
+    src.onended=()=>{ if(current===src){ current=null; if(next && token===playToken) next(); } };
+    current=src; src.start(0);
+  });
+}
+// Phones only allow sound after a tap: wake the audio engine on the first one.
+document.addEventListener("pointerdown",()=>{ audioCtx(); preloadLesson(state.lesson); },{once:true});
 function speak(text){
   if(!urduVoice || !("speechSynthesis" in window)) return false;
   try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);
@@ -325,7 +371,7 @@ function renderPlay(p){
         let moved=false;
         const advance=()=>{ if(moved) return; moved=true; stopAudio();
           G.round++; if(G.round>=6){ state.step=3; state.game=null; } else G.cur=newRound(G.round); render(); };
-        play(keyLetter(c),c.say,()=>setTimeout(advance,250)); setTimeout(advance,3000);
+        stopAudio(); chime(); setTimeout(advance,700);
       } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
         fb.className="feedback bad"; fb.textContent="Try again"; play(keyLetter(R.target),R.target.say); }
     };
@@ -373,7 +419,7 @@ function nextLessonBtn(){ const r=el("div",{class:"row"});
 
 function render(){
   if(state.lesson>=LESSONS.length) state.lesson=0;
-  renderNav();
+  renderNav(); preloadLesson(state.lesson);
   const p=$("#panel"); p.innerHTML="";
   [renderMeet,renderTrace,renderPlay,renderRead][state.step](p);
   $("#stars").textContent="★ "+state.stars;
