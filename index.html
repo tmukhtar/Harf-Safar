@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Learn to read Urdu letters: meet, trace, play and read.">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Harf Safar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap">
+<style>
+/* Layout: a single lesson column; lesson picker on top, four steps (Meet, Trace, Play, Read) as a stepper. */
+:root{
+  --bg:#EEF6F3; --surface:#FFFFFF; --ink:#12343B; --muted:#56757A; --line:#CFE3DD;
+  --accent:#F2A516; --accent-ink:#3A2600; --accent-soft:#FDF0D3;
+  --good:#2E8B57; --bad:#C8483C; --trace:#D9E9E4;
+  --f-display:"Baloo 2", "Nunito", system-ui, sans-serif;
+  --f-body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-urdu:"Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F2226; --surface:#16323A; --ink:#E6F2EF; --muted:#9DB9B5; --line:#24464E;
+  --accent:#F5B53A; --accent-ink:#2A1B00; --accent-soft:#3A3220;
+  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0F2226; --surface:#16323A; --ink:#E6F2EF; --muted:#9DB9B5; --line:#24464E;
+  --accent:#F5B53A; --accent-ink:#2A1B00; --accent-soft:#3A3220;
+  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A; color-scheme:dark }
+:root.naskh{ --f-urdu:"Noto Naskh Arabic", "Noto Nastaliq Urdu", serif; }
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:20px}
+.ur{font-family:var(--f-urdu);direction:rtl;line-height:2.3}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,canvas:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:1.9rem;margin:0;letter-spacing:.2px}
+.brand .ur{font-size:1.3rem;color:var(--muted);line-height:1.6}
+.stars{font-family:var(--f-display);font-weight:600;background:var(--accent-soft);color:var(--ink);
+  padding:4px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:6px 12px;font-size:.85rem;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.lessons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lesson-btn{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
+.lesson-btn small{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lesson-btn .ur{font-size:1.25rem;line-height:1.9}
+.lesson-btn[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.step{border:0;background:transparent;padding:6px 12px;border-radius:999px;font-weight:700;color:var(--muted);
+  display:inline-flex;gap:6px;align-items:center}
+.step b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+  background:var(--line);color:var(--ink);font-size:.78rem}
+.step[aria-current="true"]{background:var(--ink);color:var(--bg)}
+.step[aria-current="true"] b{background:var(--accent);color:var(--accent-ink)}
+
+.panel{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:20px;
+  display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel h2{font-family:var(--f-display);font-weight:800;font-size:1.4rem;margin:0;text-wrap:balance}
+.hint{color:var(--muted);margin:0;font-size:.95rem}
+
+.letters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.lcard{border:1.5px solid var(--line);background:var(--bg);border-radius:18px;padding:10px 12px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.lcard .glyph{font-size:4.2rem;line-height:1.9}
+.lcard .name{font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.lcard .pic{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)}
+.lcard .pic .ur{font-size:1.15rem;color:var(--ink);line-height:1.9}
+.lcard .emo{font-size:1.4rem}
+.lcard.playing{border-color:var(--accent);background:var(--accent-soft)}
+
+.trace-box{display:flex;flex-direction:column;gap:10px;align-items:center}
+.trace-pick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;min-width:56px;padding:0 10px}
+.chip .ur{font-size:1.5rem;line-height:2}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background:var(--bg);
+  border:1.5px dashed var(--line);touch-action:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{border:0;border-radius:999px;padding:10px 18px;font-weight:700;background:var(--line);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.5;cursor:default}
+
+.game{display:flex;flex-direction:column;align-items:center;gap:14px}
+.prompt{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-size:1.2rem;font-weight:600}
+.speak{width:64px;height:64px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center}
+.speak svg{width:30px;height:30px}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;max-width:440px}
+.choice{border:2px solid var(--line);background:var(--bg);border-radius:18px;aspect-ratio:1/1;max-width:100%}
+.choice .ur{font-size:2.6rem;line-height:1.6}
+.choice.right{border-color:var(--good);background:color-mix(in srgb, var(--good) 14%, var(--surface))}
+.choice.wrong{border-color:var(--bad);animation:shake .3s}
+.feedback{min-height:1.5em;font-weight:700;margin:0}
+.feedback.good{color:var(--good)} .feedback.bad{color:var(--bad)}
+.score{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem}
+
+.words{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.wcard{border:1.5px solid var(--line);background:var(--bg);border-radius:18px;padding:8px 12px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.wcard .ur{font-size:2.6rem;line-height:2.1}
+.wcard .meaning{font-size:.9rem;color:var(--muted);min-height:1.4em}
+.wcard .meaning b{color:var(--ink)}
+.small-btns{display:flex;gap:6px}
+.small-btns button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:.82rem;font-weight:700}
+
+.note{font-size:.85rem;color:var(--muted);border-top:1.5px solid var(--line);padding-top:12px;margin:0}
+.voice-warn{background:var(--accent-soft);border-radius:14px;padding:10px 14px;font-size:.9rem;margin:0}
+
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){ .choice.wrong{animation:none} }
+@media (max-width:480px){ .lcard .glyph{font-size:3.4rem} .choice .ur{font-size:2.1rem} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><h1>Harf Safar</h1><span class="ur">حرف سفر</span></div>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Urdu font">
+        <button id="f-nast" aria-pressed="true">Nastaliq</button>
+        <button id="f-naskh" aria-pressed="false">Naskh</button>
+      </div>
+      <span class="stars" id="stars" aria-live="polite">★ 0</span>
+    </div>
+  </header>
+
+  <nav class="lessons" id="lessons" aria-label="Lessons"></nav>
+  <nav class="steps" id="steps" aria-label="Lesson steps"></nav>
+
+  <p class="voice-warn" id="voiceWarn" hidden>Some sounds aren't recorded yet. Those use this device's Urdu voice where it has one.</p>
+
+  <section class="panel" id="panel" aria-live="polite"></section>
+
+  <p class="note">Prototype: lessons 1–4 (letters that never join forward). Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings.</p>
+</div>
+
+<script>
+const LESSONS = [
+  { letters:[
+      {g:"ا", name:"alif", say:"الف", sound:"a", pic:{w:"انار", m:"pomegranate", e:"🍎"}},
+      {g:"آ", name:"alif madd", say:"الف مد", sound:"aa", pic:{w:"آم", m:"mango", e:"🥭"}} ],
+    words:[] },
+  { letters:[
+      {g:"د", name:"daal", say:"دال", sound:"d", pic:{w:"دروازہ", m:"door", e:"🚪"}},
+      {g:"ڈ", id:"ddaal", name:"ḍaal", say:"ڈال", sound:"ḍ (hard d)", pic:{w:"ڈبہ", m:"box", e:"📦"}} ],
+    words:[{w:"دادا", r:"daada", m:"grandpa (dad's father)"}] },
+  { letters:[
+      {g:"ر", name:"re", say:"رے", sound:"r", pic:{w:"رسی", m:"rope", e:"🪢"}},
+      {g:"ڑ", id:"rre", name:"ṛe", say:"ڑے", sound:"ṛ (never starts a word)", pic:{w:"پہاڑ", m:"mountain", e:"⛰️"}},
+      {g:"ز", name:"ze", say:"زے", sound:"z", pic:{w:"زرافہ", m:"giraffe", e:"🦒"}} ],
+    words:[{id:"ddar", w:"ڈر", r:"ḍar", m:"fear"},{w:"زرد", r:"zard", m:"yellow"}] },
+  { letters:[
+      {g:"و", name:"wao", say:"واؤ", sound:"w, oo or o", pic:{w:"وردی", m:"uniform", e:"👕"}} ],
+    words:[{w:"دو", r:"do", m:"two"},{w:"دور", r:"door", m:"far"},{w:"زور", r:"zor", m:"strength"},
+           {id:"ddor", w:"ڈور", r:"ḍor", m:"string"},{w:"آڑو", r:"aaṛu", m:"peach"}] }
+];
+const STEPS = ["Meet","Trace","Play","Read"];
+const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const state = { lesson: store.get("hs.lesson",0), step:0, stars: store.get("hs.stars",0),
+  traceIdx:0, game:null };
+
+/* ---------- audio ---------- */
+let urduVoice = null;
+function pickVoice(){
+  if(!("speechSynthesis" in window)) return;
+  const vs = speechSynthesis.getVoices();
+  urduVoice = vs.find(v=>/^ur/i.test(v.lang)) || null;
+  /* every clip is recorded, so no device-voice warning is needed */
+}
+let urduVoiceCheckedOnce=false;
+if("speechSynthesis" in window){
+  pickVoice(); speechSynthesis.onvoiceschanged = pickVoice;
+  setTimeout(()=>{ urduVoiceCheckedOnce=true; pickVoice(); },1200);
+}
+/* Audio files come first (audio/<key>.mp3, same on every phone);
+   the device voice is only a fallback while files are missing. */
+const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>"pic-"+slug(x.pic.m), keyWord=w=>"word-"+(w.id||slug(w.r));
+let current=null;
+function play(key,text,next){
+  let fell=false; const fallback=()=>{ if(!fell){ fell=true; speak(text); if(next) setTimeout(next,1300); } };
+  try{ if(current){ current.pause(); } if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
+  const a=new Audio("audio/"+key+".mp3"); current=a;
+  a.onerror=fallback; if(next) a.onended=()=>{ if(current===a) next(); };
+  const pr=a.play(); if(pr&&pr.catch) pr.catch(fallback);
+}
+function speak(text){
+  if(!urduVoice || !("speechSynthesis" in window)) return false;
+  try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);
+    u.voice=urduVoice; u.lang=urduVoice.lang; u.rate=.8; speechSynthesis.speak(u); return true; }
+  catch(e){ return false; }
+}
+
+/* ---------- helpers ---------- */
+const $ = s=>document.querySelector(s);
+const el = (tag, attrs={}, html="")=>{ const n=document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs)) n.setAttribute(k,v); n.innerHTML=html; return n; };
+function addStar(n=1){ state.stars+=n; store.set("hs.stars",state.stars); $("#stars").textContent="★ "+state.stars; }
+function knownLetters(){ return LESSONS.slice(0,state.lesson+1).flatMap(l=>l.letters); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ---------- nav ---------- */
+function renderNav(){
+  const ln=$("#lessons"); ln.innerHTML="";
+  LESSONS.forEach((l,i)=>{
+    const b=el("button",{class:"lesson-btn","aria-current":String(i===state.lesson)},
+      `<small>Lesson ${i+1}</small><span class="ur">${l.letters.map(x=>x.g).join(" ")}</span>`);
+    b.onclick=()=>{ state.lesson=i; state.step=0; state.traceIdx=0; state.game=null; store.set("hs.lesson",i); render(); };
+    ln.appendChild(b);
+  });
+  const sn=$("#steps"); sn.innerHTML="";
+  STEPS.forEach((s,i)=>{
+    const b=el("button",{class:"step","aria-current":String(i===state.step)},`<b>${i+1}</b>${s}`);
+    b.onclick=()=>{ state.step=i; render(); };
+    sn.appendChild(b);
+  });
+}
+
+/* ---------- steps ---------- */
+function renderMeet(p){
+  const L=LESSONS[state.lesson];
+  p.append(el("h2",{},"Meet the letters"), el("p",{class:"hint"},"Tap a letter to hear it, then its picture word."));
+  const grid=el("div",{class:"letters"});
+  L.letters.forEach(x=>{
+    const c=el("button",{class:"lcard","aria-label":`${x.name}, sound ${x.sound}`},
+      `<span class="ur glyph">${x.g}</span><span class="name">${x.name}</span>
+       <span class="hint">sound: ${x.sound}</span>
+       <span class="pic"><span class="emo" aria-hidden="true">${x.pic.e}</span><span class="ur">${x.pic.w}</span><span>${x.pic.m}</span></span>`);
+    c.onclick=()=>{ grid.querySelectorAll(".lcard").forEach(n=>n.classList.remove("playing")); c.classList.add("playing");
+      if(x.viaWord) play(keyPic(x),x.pic.w); else play(keyLetter(x),x.say,()=>play(keyPic(x),x.pic.w)); };
+    grid.appendChild(c);
+  });
+  p.append(grid, nextBtn("Trace them"));
+}
+
+function renderTrace(p){
+  const L=LESSONS[state.lesson];
+  if(state.traceIdx>=L.letters.length) state.traceIdx=0;
+  p.append(el("h2",{},"Trace it"), el("p",{class:"hint"},"Follow the shape with your finger. Urdu is written from right to left."));
+  const box=el("div",{class:"trace-box"});
+  const pick=el("div",{class:"trace-pick"});
+  L.letters.forEach((x,i)=>{ const b=el("button",{class:"chip","aria-pressed":String(i===state.traceIdx),"aria-label":"Trace "+x.name},`<span class="ur">${x.g}</span>`);
+    b.onclick=()=>{ state.traceIdx=i; render(); }; pick.appendChild(b); });
+  const cv=el("canvas",{width:"600",height:"600","aria-label":"Tracing area",tabindex:"0"});
+  const row=el("div",{class:"row"});
+  const clear=el("button",{class:"btn"},"Clear"); const done=el("button",{class:"btn primary"},"Done");
+  row.append(clear,done); box.append(pick,cv,row); p.append(box);
+
+  const ctx=cv.getContext("2d"); const x=L.letters[state.traceIdx];
+  const css=getComputedStyle(document.documentElement);
+  const drawGuide=()=>{
+    ctx.clearRect(0,0,600,600);
+    ctx.fillStyle=css.getPropertyValue("--trace").trim()||"#ddd";
+    ctx.font=`400 300px ${css.getPropertyValue("--f-urdu")}`;
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.direction="rtl";
+    const nast=!document.documentElement.classList.contains("naskh");
+    ctx.fillText(x.g,300, nast?250:320);
+  };
+  document.fonts.load(`300px ${css.getPropertyValue("--f-urdu")}`, x.g).then(drawGuide, drawGuide);
+  drawGuide();
+  let drawing=false, inked=0;
+  const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*600/r.width,(e.clientY-r.top)*600/r.height]; };
+  cv.onpointerdown=e=>{ drawing=true; cv.setPointerCapture(e.pointerId); const [a,b]=pos(e); ctx.beginPath(); ctx.moveTo(a,b); };
+  cv.onpointermove=e=>{ if(!drawing) return; const [a,b]=pos(e);
+    ctx.strokeStyle=css.getPropertyValue("--accent").trim(); ctx.lineWidth=26; ctx.lineCap="round"; ctx.lineJoin="round";
+    ctx.lineTo(a,b); ctx.stroke(); inked++; };
+  cv.onpointerup=cv.onpointercancel=()=>{ drawing=false; };
+  clear.onclick=()=>{ inked=0; drawGuide(); };
+  done.onclick=()=>{
+    if(inked<8){ done.textContent="Trace first"; setTimeout(()=>done.textContent="Done",1200); return; }
+    addStar(); play(keyLetter(x),x.say);
+    if(state.traceIdx<L.letters.length-1){ state.traceIdx++; render(); } else { state.step=2; render(); }
+  };
+}
+
+function newRound(){
+  const pool=knownLetters();
+  const target=pool[Math.floor(Math.random()*pool.length)];
+  const lessonLetters=LESSONS[state.lesson].letters;
+  const t = Math.random()<.7 ? lessonLetters[Math.floor(Math.random()*lessonLetters.length)] : target;
+  const others=shuffle(pool.filter(l=>l.g!==t.g)).slice(0,3);
+  // pad choices from all lessons if fewer than 4 are known
+  const extra=shuffle(LESSONS.flatMap(l=>l.letters).filter(l=>l.g!==t.g && !others.includes(l)));
+  while(others.length<3) others.push(extra.shift());
+  return { target:t, choices:shuffle([t,...others]), locked:false };
+}
+function renderPlay(p){
+  if(!state.game) state.game={round:0,right:0,cur:newRound()};
+  const G=state.game, R=G.cur;
+  p.append(el("h2",{},"Listen and tap"));
+  const game=el("div",{class:"game"});
+  const prompt=el("div",{class:"prompt"});
+  const sp=el("button",{class:"speak","aria-label":"Play the sound again"},SPEAKER);
+  const label=el("span",{}, "Which letter is this?");
+  sp.onclick=()=>play(keyLetter(R.target),R.target.say);
+  prompt.append(sp,label);
+  const ch=el("div",{class:"choices"});
+  const fb=el("p",{class:"feedback"});
+  R.choices.forEach(c=>{
+    const b=el("button",{class:"choice","aria-label":c.name},`<span class="ur">${c.g}</span>`);
+    b.onclick=()=>{
+      if(R.locked) return;
+      if(c.g===R.target.g){ R.locked=true; b.classList.add("right"); fb.className="feedback good"; fb.textContent="Well done!";
+        G.right++; addStar(); play(keyLetter(c),c.say);
+        setTimeout(()=>{ G.round++; if(G.round>=6){ state.step=3; state.game=null; } else G.cur=newRound(); render(); },900);
+      } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+        fb.className="feedback bad"; fb.textContent="Try again"; play(keyLetter(R.target),R.target.say); }
+    };
+    ch.appendChild(b);
+  });
+  game.append(prompt,ch,fb,el("span",{class:"score"},`Round ${G.round+1} of 6`));
+  p.append(game);
+  if(G.round===0 && !R.played){ R.played=true; }
+}
+
+function renderRead(p){
+  const L=LESSONS[state.lesson];
+  p.append(el("h2",{},"Read it"));
+  if(!L.words.length){
+    p.append(el("p",{class:"hint"},"Alif can't make a word on its own yet. Real words start in lesson 2."),
+             nextLessonBtn());
+    return;
+  }
+  p.append(el("p",{class:"hint"},"Try reading each word aloud first, then tap to check."));
+  const grid=el("div",{class:"words"});
+  L.words.forEach(w=>{
+    const c=el("div",{class:"wcard"});
+    const meaning=el("div",{class:"meaning"},"");
+    const btns=el("div",{class:"small-btns"});
+    const hear=el("button",{},"Hear it"); const check=el("button",{},"Check");
+    hear.onclick=()=>play(keyWord(w),w.w);
+    check.onclick=()=>{ if(!meaning.innerHTML){ addStar(); } meaning.innerHTML=`<b>${w.r}</b> · ${w.m}`; play(keyWord(w),w.w); };
+    btns.append(hear,check);
+    c.append(el("span",{class:"ur"},w.w),meaning,btns);
+    grid.appendChild(c);
+  });
+  p.append(grid, nextLessonBtn());
+}
+
+function nextBtn(label){ const r=el("div",{class:"row"}); const b=el("button",{class:"btn primary"},label);
+  b.onclick=()=>{ state.step++; render(); }; r.appendChild(b); return r; }
+function nextLessonBtn(){ const r=el("div",{class:"row"});
+  if(state.lesson<LESSONS.length-1){ const b=el("button",{class:"btn primary"},`Go to lesson ${state.lesson+2}`);
+    b.onclick=()=>{ state.lesson++; state.step=0; state.traceIdx=0; store.set("hs.lesson",state.lesson); render(); window.scrollTo({top:0}); };
+    r.appendChild(b);
+  } else r.appendChild(el("p",{class:"hint"},"That's the end of the prototype. Joining letters starts in lesson 5."));
+  return r; }
+
+function render(){
+  if(state.lesson>=LESSONS.length) state.lesson=0;
+  renderNav();
+  const p=$("#panel"); p.innerHTML="";
+  [renderMeet,renderTrace,renderPlay,renderRead][state.step](p);
+  $("#stars").textContent="★ "+state.stars;
+}
+
+/* ---------- font toggle ---------- */
+function setFont(naskh){
+  document.documentElement.classList.toggle("naskh",naskh);
+  $("#f-nast").setAttribute("aria-pressed",String(!naskh)); $("#f-naskh").setAttribute("aria-pressed",String(naskh));
+  store.set("hs.naskh",naskh); render();
+}
+$("#f-nast").onclick=()=>setFont(false); $("#f-naskh").onclick=()=>setFont(true);
+if(store.get("hs.naskh",false)) document.documentElement.classList.add("naskh"),
+  $("#f-nast").setAttribute("aria-pressed","false"), $("#f-naskh").setAttribute("aria-pressed","true");
+
+render();
+</script>
+
+</body>
+</html>
