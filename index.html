@@ -197,6 +197,7 @@ if("speechSynthesis" in window){
 const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>"pic-"+slug(x.pic.m), keyWord=w=>"word-"+(w.id||slug(w.r));
 let current=null;
+function stopAudio(){ try{ if(current){ current.onended=null; current.pause(); } if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
 function play(key,text,next){
   let fell=false; const fallback=()=>{ if(!fell){ fell=true; speak(text); if(next) setTimeout(next,1300); } };
   try{ if(current){ current.pause(); } if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
@@ -225,13 +226,13 @@ function renderNav(){
   LESSONS.forEach((l,i)=>{
     const b=el("button",{class:"lesson-btn","aria-current":String(i===state.lesson)},
       `<small>Lesson ${i+1}</small><span class="ur">${l.letters.map(x=>x.g).join(" ")}</span>`);
-    b.onclick=()=>{ state.lesson=i; state.step=0; state.traceIdx=0; state.game=null; store.set("hs.lesson",i); render(); };
+    b.onclick=()=>{ stopAudio(); state.lesson=i; state.step=0; state.traceIdx=0; state.game=null; store.set("hs.lesson",i); render(); };
     ln.appendChild(b);
   });
   const sn=$("#steps"); sn.innerHTML="";
   STEPS.forEach((s,i)=>{
     const b=el("button",{class:"step","aria-current":String(i===state.step)},`<b>${i+1}</b>${s}`);
-    b.onclick=()=>{ state.step=i; render(); };
+    b.onclick=()=>{ stopAudio(); state.step=i; state.game=null; render(); };
     sn.appendChild(b);
   });
 }
@@ -319,8 +320,12 @@ function renderPlay(p){
     b.onclick=()=>{
       if(R.locked) return;
       if(c.g===R.target.g){ R.locked=true; b.classList.add("right"); fb.className="feedback good"; fb.textContent="Well done!";
-        G.right++; addStar(); play(keyLetter(c),c.say);
-        setTimeout(()=>{ G.round++; if(G.round>=6){ state.step=3; state.game=null; } else G.cur=newRound(G.round); render(); },900);
+        G.right++; addStar();
+        // Let the confirming sound finish, then move on (with a safety timer if it never ends).
+        let moved=false;
+        const advance=()=>{ if(moved) return; moved=true; stopAudio();
+          G.round++; if(G.round>=6){ state.step=3; state.game=null; } else G.cur=newRound(G.round); render(); };
+        play(keyLetter(c),c.say,()=>setTimeout(advance,250)); setTimeout(advance,3000);
       } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
         fb.className="feedback bad"; fb.textContent="Try again"; play(keyLetter(R.target),R.target.say); }
     };
@@ -328,7 +333,8 @@ function renderPlay(p){
   });
   game.append(prompt,ch,fb,el("span",{class:"score"},`Round ${G.round+1} of 6`));
   p.append(game);
-  if(G.round===0 && !R.played){ R.played=true; }
+  // Each new question says its own sound once; the speaker button repeats it.
+  if(!R.played){ R.played=true; setTimeout(()=>{ if(state.game&&state.game.cur===R) play(keyLetter(R.target),R.target.say); },300); }
 }
 
 function renderRead(p){
