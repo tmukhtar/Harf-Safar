@@ -151,7 +151,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 14.</p>
+  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 15.</p>
 </div>
 
 <script>
@@ -211,6 +211,8 @@ const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().re
 const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>"pic-"+slug(x.pic.m), keyWord=w=>"word-"+(w.id||slug(w.r));
 /* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
    Web Audio also keeps playing allowed on phones after the first tap. */
+// Bump this whenever audio files change, so phones fetch the new recordings.
+const AUDIO_VERSION="15";
 let ctx=null, current=null, playToken=0;
 const buffers={};   // key -> Promise<AudioBuffer|null>
 // On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
@@ -221,7 +223,7 @@ function audioCtx(){
   return ctx;
 }
 function loadClip(key){
-  if(!buffers[key]) buffers[key]=fetch("audio/"+key+".mp3")
+  if(!buffers[key]) buffers[key]=fetch("audio/"+key+".mp3?v="+AUDIO_VERSION, {cache:"no-cache"})
     .then(r=>{ if(!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
     .then(data=>{ const c=audioCtx(); if(!c) return null;
       return new Promise((ok,bad)=>{ const pr=c.decodeAudioData(data,ok,bad); if(pr&&pr.then) pr.then(ok,bad); }); })
