@@ -53,7 +53,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
 .seg button{border:0;background:transparent;padding:6px 12px;font-size:.85rem;font-weight:700;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 
-.lessons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lessons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .lesson-btn{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 6px;
   display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
 .lesson-btn small{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -82,6 +82,11 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
 .lcard .pic .ur{font-size:1.15rem;color:var(--ink);line-height:1.9}
 .lcard .emo{font-size:1.4rem}
 .lcard.playing{border-color:var(--accent);background:var(--accent-soft)}
+.shapes{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;direction:ltr}
+.shape{display:flex;flex-direction:column;align-items:center;min-width:44px;padding:0 6px 4px;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.shape .ur{font-size:1.6rem;line-height:2}
+.shape small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 
 .trace-box{display:flex;flex-direction:column;gap:10px;align-items:center}
 .trace-pick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -146,7 +151,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: lessons 1–4 (letters that never join forward). Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 13.</p>
+  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 14.</p>
 </div>
 
 <script>
@@ -167,7 +172,15 @@ const LESSONS = [
   { letters:[
       {g:"و", name:"wao", say:"واؤ", sound:"w, oo or o", pic:{w:"وردی", m:"uniform", e:"👕"}} ],
     words:[{w:"دو", r:"do", m:"two"},{w:"دور", r:"door", m:"far"},{w:"زور", r:"zor", m:"strength"},
-           {id:"ddor", w:"ڈور", r:"ḍor", m:"string"},{w:"آڑو", r:"aaṛu", m:"peach"}] }
+           {id:"ddor", w:"ڈور", r:"ḍor", m:"string"},{w:"آڑو", r:"aaṛu", m:"peach"}] },
+  { letters:[
+      {g:"ب", name:"be", say:"بے", sound:"b", joins:true, pic:{w:"بکری", m:"goat", e:"🐐"}},
+      {g:"پ", name:"pe", say:"پے", sound:"p", joins:true, pic:{w:"پتنگ", m:"kite", e:"🪁"}} ],
+    words:[{w:"اب", r:"ab", m:"now"},{w:"ابو", r:"abbu", m:"dad"},{w:"باپ", r:"baap", m:"father"},{w:"بڑا", r:"baṛa", m:"big"}] },
+  { letters:[
+      {g:"ت", name:"te", say:"تے", sound:"t (soft t)", joins:true, pic:{w:"تتلی", m:"butterfly", e:"🦋"}},
+      {g:"ٹ", id:"tte", name:"ṭe", say:"ٹے", sound:"ṭ (hard t)", joins:true, pic:{w:"ٹماٹر", m:"tomato", e:"🍅"}} ],
+    words:[{w:"بات", r:"baat", m:"talk"},{id:"ttab", w:"ٹب", r:"ṭab", m:"tub"},{w:"پتا", r:"pata", m:"address"},{id:"battwa", w:"بٹوا", r:"baṭwa", m:"purse"}] }
 ];
 const STEPS = ["Meet","Trace","Play","Read"];
 const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
@@ -274,6 +287,13 @@ function renderNav(){
 }
 
 /* ---------- steps ---------- */
+// The four shapes a joining letter takes, drawn with a zero-width joiner.
+function shapes(g){
+  const Z="\u200D";
+  const f=[["end",Z+g],["middle",Z+g+Z],["start",g+Z],["alone",g]];  // right to left, as read
+  return `<span class="shapes" aria-label="Its shapes inside words">${f.map(([n,t])=>
+    `<span class="shape"><span class="ur">${t}</span><small>${n}</small></span>`).join("")}</span>`;
+}
 function renderMeet(p){
   const L=LESSONS[state.lesson];
   p.append(el("h2",{},"Meet the letters"), el("p",{class:"hint"},"Tap a letter to hear it, then its picture word."));
@@ -282,6 +302,7 @@ function renderMeet(p){
     const c=el("button",{class:"lcard","aria-label":`${x.name}, sound ${x.sound}`},
       `<span class="ur glyph">${x.g}</span><span class="name">${x.name}</span>
        <span class="hint">sound: ${x.sound}</span>
+       ${x.joins ? shapes(x.g) : ""}
        <span class="pic"><span class="emo" aria-hidden="true">${x.pic.e}</span><span class="ur">${x.pic.w}</span><span>${x.pic.m}</span></span>`);
     c.onclick=()=>{ grid.querySelectorAll(".lcard").forEach(n=>n.classList.remove("playing")); c.classList.add("playing");
       if(x.viaWord) play(keyPic(x),x.pic.w); else play(keyLetter(x),x.say,()=>play(keyPic(x),x.pic.w)); };
@@ -404,7 +425,7 @@ function nextLessonBtn(){ const r=el("div",{class:"row"});
   if(state.lesson<LESSONS.length-1){ const b=el("button",{class:"btn primary"},`Go to lesson ${state.lesson+2}`);
     b.onclick=()=>{ state.lesson++; state.step=0; state.traceIdx=0; store.set("hs.lesson",state.lesson); render(); window.scrollTo({top:0}); };
     r.appendChild(b);
-  } else r.appendChild(el("p",{class:"hint"},"That's the end of the prototype. Joining letters starts in lesson 5."));
+  } else r.appendChild(el("p",{class:"hint"},"That's the end of the prototype for now. More letters are coming soon."));
   return r; }
 
 function render(){
