@@ -151,7 +151,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 15.</p>
+  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 16.</p>
 </div>
 
 <script>
@@ -212,7 +212,7 @@ const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.na
 /* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
    Web Audio also keeps playing allowed on phones after the first tap. */
 // Bump this whenever audio files change, so phones fetch the new recordings.
-const AUDIO_VERSION="15";
+const AUDIO_VERSION="16";
 let ctx=null, current=null, playToken=0;
 const buffers={};   // key -> Promise<AudioBuffer|null>
 // On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
