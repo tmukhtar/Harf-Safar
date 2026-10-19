@@ -20,6 +20,7 @@ img{max-width:100%}
   --bg:#EEF6F3; --surface:#FFFFFF; --ink:#12343B; --muted:#56757A; --line:#CFE3DD;
   --accent:#F2A516; --accent-ink:#3A2600; --accent-soft:#FDF0D3;
   --good:#2E8B57; --bad:#C8483C; --trace:#D9E9E4;
+  --sky:#DDEFF7; --grass:#9ED39A; --leaf:#4FA36B; --trunk:#8A5A3B; --kite:#E2483D; --skin:#E8B48F; --shirt:#2F7FA8; --dadshirt:#3C6E47; --sun:#F7C94B;
   --f-display:"Baloo 2", "Nunito", system-ui, sans-serif;
   --f-body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-urdu:"Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif;
@@ -27,11 +28,13 @@ img{max-width:100%}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0F2226; --surface:#16323A; --ink:#E6F2EF; --muted:#9DB9B5; --line:#24464E;
   --accent:#F5B53A; --accent-ink:#2A1B00; --accent-soft:#3A3220;
-  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A; color-scheme:dark } }
+  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A;
+  --sky:#1B3C4A; --grass:#2E5F3A; --leaf:#3F8A57; --trunk:#7A4F33; --kite:#EE6255; --skin:#D9A47F; --shirt:#4B9BC4; --dadshirt:#5A9466; --sun:#E9B93A; color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#0F2226; --surface:#16323A; --ink:#E6F2EF; --muted:#9DB9B5; --line:#24464E;
   --accent:#F5B53A; --accent-ink:#2A1B00; --accent-soft:#3A3220;
-  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A; color-scheme:dark }
+  --good:#5CC48A; --bad:#EE7A6E; --trace:#21434A;
+  --sky:#1B3C4A; --grass:#2E5F3A; --leaf:#3F8A57; --trunk:#7A4F33; --kite:#EE6255; --skin:#D9A47F; --shirt:#4B9BC4; --dadshirt:#5A9466; --sun:#E9B93A; color-scheme:dark }
 :root.naskh{ --f-urdu:"Noto Naskh Arabic", "Noto Nastaliq Urdu", serif; }
 
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
@@ -126,6 +129,28 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 .note{font-size:.85rem;color:var(--muted);border-top:1.5px solid var(--line);padding-top:12px;margin:0}
 .voice-warn{background:var(--accent-soft);border-radius:14px;padding:10px 14px;font-size:.9rem;margin:0}
 
+/* stories */
+.story-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.story-title{font-size:1.7rem;line-height:2.2;margin:0}
+.scene{width:100%;max-width:100%;aspect-ratio:8/5;border-radius:16px;display:block;background:var(--sky)}
+.story-text{font-size:2rem;line-height:2.7;margin:0;text-align:right}
+.story-text .sent{border-radius:10px;padding:0 4px;transition:background .2s}
+.story-text .sent.reading{background:var(--accent-soft)}
+.story-text .tap{cursor:pointer;border-radius:6px;padding:0 2px;
+  text-decoration:underline dotted var(--accent);text-decoration-thickness:3px;text-underline-offset:.35em}
+.story-text .tap:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.story-text .tap.active{background:var(--accent-soft)}
+.english{margin:0;color:var(--muted);font-size:1rem}
+.wordcard{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 14px;
+  display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.wordcard .big{font-size:2.4rem;line-height:2.1;grid-row:span 3}
+.wordcard .roman{font-weight:700}
+.wordcard .urmean{font-size:1.15rem;line-height:2.1;text-align:right}
+.story-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dots{display:flex;gap:6px}
+.dots span{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dots span.on{background:var(--accent)}
+.done-msg{font-family:var(--f-display);font-size:1.3rem;font-weight:800;color:var(--good);margin:0;text-align:center}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @media (prefers-reduced-motion: reduce){ .choice.wrong{animation:none} }
 @media (max-width:480px){ .lcard .glyph{font-size:3.4rem} .choice .ur{font-size:2.1rem} }
@@ -136,6 +161,10 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
   <header>
     <div class="brand"><h1>Harf Safar</h1><span class="ur">حرف سفر</span></div>
     <div class="toolbar">
+      <div class="seg" role="group" aria-label="Section">
+        <button id="m-letters" aria-pressed="true">Letters</button>
+        <button id="m-stories" aria-pressed="false">Stories</button>
+      </div>
       <div class="seg" role="group" aria-label="Urdu font">
         <button id="f-nast" aria-pressed="true">Nastaliq</button>
         <button id="f-naskh" aria-pressed="false">Naskh</button>
@@ -151,7 +180,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: lessons 1–6. Lessons 5–6 introduce the first letters that join. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 16.</p>
+  <p class="note">Prototype: letter lessons 1–6 and one story. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 17.</p>
 </div>
 
 <script>
@@ -190,7 +219,7 @@ const store = {
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
 const state = { lesson: store.get("hs.lesson",0), step:0, stars: store.get("hs.stars",0),
-  traceIdx:0, game:null };
+  traceIdx:0, game:null, mode: store.get("hs.mode","letters"), page:0, showEn:false };
 
 /* ---------- audio ---------- */
 let urduVoice = null;
@@ -212,7 +241,7 @@ const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.na
 /* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
    Web Audio also keeps playing allowed on phones after the first tap. */
 // Bump this whenever audio files change, so phones fetch the new recordings.
-const AUDIO_VERSION="16";
+const AUDIO_VERSION="17";
 let ctx=null, current=null, playToken=0;
 const buffers={};   // key -> Promise<AudioBuffer|null>
 // On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
@@ -432,10 +461,143 @@ function nextLessonBtn(){ const r=el("div",{class:"row"});
 
 function render(){
   if(state.lesson>=LESSONS.length) state.lesson=0;
-  renderNav(); preloadLesson(state.lesson);
+  const stories=state.mode==="stories";
+  $("#lessons").hidden=stories; $("#steps").hidden=stories;
+  $("#m-letters").setAttribute("aria-pressed",String(!stories)); $("#m-stories").setAttribute("aria-pressed",String(stories));
   const p=$("#panel"); p.innerHTML="";
-  [renderMeet,renderTrace,renderPlay,renderRead][state.step](p);
+  if(stories){ renderStory(p); }
+  else { renderNav(); preloadLesson(state.lesson); [renderMeet,renderTrace,renderPlay,renderRead][state.step](p); }
   $("#stars").textContent="★ "+state.stars;
+}
+
+
+/* ---------- stories ---------- */
+const STORIES=[{
+  id:"kite", title:"علی کی پتنگ", en:"Ali's Kite",
+  pages:[
+    {scene:1, s:["یہ علی ہے۔","علی کے پاس ایک لال پتنگ ہے۔"], en:"This is Ali. Ali has a red kite."},
+    {scene:2, s:["ہوا تیز ہے۔","پتنگ اوپر اُڑتی ہے۔"], en:"The wind is strong. The kite flies up."},
+    {scene:3, s:["پتنگ ایک درخت میں پھنس جاتی ہے۔","علی اداس ہے۔"], en:"The kite gets stuck in a tree. Ali is sad."},
+    {scene:4, s:["ابو آتے ہیں اور پتنگ اتار دیتے ہیں۔","علی خوش ہے!"], en:"Dad comes and gets the kite down. Ali is happy!"}
+  ],
+  words:{
+    "پتنگ":{r:"patang", en:"kite", ur:"کاغذ کا کھلونا جو ہوا میں اُڑتا ہے", key:"pic-kite"},
+    "ہوا":{r:"hawa", en:"wind, air", ur:"جو چلتی ہے تو پتے ہلتے ہیں", key:"sw-hawa"},
+    "تیز":{r:"tez", en:"strong, fast", ur:"بہت زور سے", key:"sw-tez"},
+    "اُڑتی":{r:"uṛti", en:"flies (uṛna: to fly)", ur:"ہوا میں اوپر جاتی ہے", key:"sw-urti"},
+    "درخت":{r:"darakht", en:"tree", ur:"پیڑ", key:"sw-darakht"},
+    "پھنس":{r:"phans", en:"stuck (phans jaana: to get stuck)", ur:"اٹک جانا", key:"sw-phans"},
+    "اداس":{r:"udaas", en:"sad", ur:"غمگین", key:"sw-udaas"},
+    "ابو":{r:"abbu", en:"dad", ur:"والد", key:"word-abbu"},
+    "خوش":{r:"khush", en:"happy", ur:"اداس کا اُلٹ", key:"sw-khush"}
+  }
+}];
+const sentKey=(st,pg,i)=>`story-${st.id}-${pg+1}${"ab"[i]}`;
+
+// Simple scene pictures, drawn from shapes so they follow the light and dark themes.
+function figure(x,y,mood,opts={}){
+  const k=opts.scale||1, shirt=opts.shirt||"var(--shirt)";
+  const hy=y-62*k, r=11*k;
+  const mouth= mood==="sad" ? `M${x-5*k} ${hy+6*k} q${5*k} ${-5*k} ${10*k} 0`
+                            : `M${x-5*k} ${hy+3*k} q${5*k} ${6*k} ${10*k} 0`;
+  const arm = opts.armUp ? `M${x} ${y-44*k} L${x+16*k} ${y-74*k}` : `M${x} ${y-44*k} L${x+16*k} ${y-30*k}`;
+  return `<g stroke="var(--ink)" stroke-width="${2.2*k}" stroke-linecap="round" fill="none">
+    <path d="M${x-6*k} ${y} L${x} ${y-22*k} L${x+6*k} ${y}"/>
+    <path d="M${x} ${y-44*k} L${x-14*k} ${y-30*k}"/><path d="${arm}"/>
+  </g>
+  <rect x="${x-9*k}" y="${y-50*k}" width="${18*k}" height="${28*k}" rx="${5*k}" fill="${shirt}"/>
+  <circle cx="${x}" cy="${hy}" r="${r}" fill="var(--skin)"/>
+  <circle cx="${x-4*k}" cy="${hy-2*k}" r="${1.4*k}" fill="var(--ink)"/><circle cx="${x+4*k}" cy="${hy-2*k}" r="${1.4*k}" fill="var(--ink)"/>
+  <path d="${mouth}" stroke="var(--ink)" stroke-width="${1.6*k}" fill="none" stroke-linecap="round"/>`;
+}
+function kite(x,y,s=1){
+  return `<polygon points="${x},${y-18*s} ${x+13*s},${y} ${x},${y+20*s} ${x-13*s},${y}" fill="var(--kite)" stroke="var(--ink)" stroke-width="1.5"/>
+  <path d="M${x} ${y+20*s} q6 10 -2 18 q-8 8 2 16" stroke="var(--ink)" stroke-width="1.4" fill="none"/>`;
+}
+function tree(x){
+  return `<rect x="${x-8}" y="105" width="16" height="70" fill="var(--trunk)"/>
+  <circle cx="${x}" cy="80" r="38" fill="var(--leaf)"/><circle cx="${x-30}" cy="98" r="24" fill="var(--leaf)"/><circle cx="${x+30}" cy="98" r="24" fill="var(--leaf)"/>`;
+}
+function scene(n){
+  const ground=`<rect x="0" y="170" width="320" height="30" fill="var(--grass)"/>`;
+  const sun=`<circle cx="40" cy="36" r="16" fill="var(--sun)"/>`;
+  let body="";
+  if(n===1) body= sun + figure(130,172,"happy") + `<path d="M146 142 L190 96" stroke="var(--ink)" stroke-width="1.2"/>` + kite(196,86);
+  if(n===2) body= `<g stroke="var(--muted)" stroke-width="2" fill="none" stroke-linecap="round">
+      <path d="M150 70 q20 -10 40 0 t40 0"/><path d="M135 95 q20 -10 40 0 t40 0"/><path d="M160 120 q20 -10 40 0 t40 0"/></g>`
+      + figure(80,172,"happy",{armUp:true}) + `<path d="M96 98 L246 52" stroke="var(--ink)" stroke-width="1.2"/>` + kite(252,44);
+  if(n===3) body= sun + tree(225) + kite(226,74,.9) + `<path d="M226 92 q-6 30 4 60" stroke="var(--ink)" stroke-width="1.2" fill="none"/>` + figure(100,172,"sad");
+  if(n===4) body= sun + tree(245) + figure(200,176,"happy",{armUp:true,scale:1.3,shirt:"var(--dadshirt)"}) + kite(224,72,.9) + figure(110,172,"happy");
+  return `<svg class="scene" viewBox="0 0 320 200" role="img" aria-label="Story picture">${body}${ground}</svg>`;
+}
+
+function preloadStory(st){
+  st.pages.forEach((pg,i)=>pg.s.forEach((_,j)=>loadClip(sentKey(st,i,j))));
+  Object.values(st.words).forEach(w=>loadClip(w.key));
+}
+function renderStory(p){
+  const st=STORIES[0];
+  if(state.page==null||state.page>=st.pages.length) state.page=0;
+  const pg=st.pages[state.page]; preloadStory(st);
+
+  const head=el("div",{class:"story-head"});
+  head.append(el("h2",{class:"ur story-title"},st.title), el("span",{class:"hint"},st.en));
+  p.append(head);
+  p.insertAdjacentHTML("beforeend", scene(pg.scene));
+
+  // the page text: sentences, with glossary words as buttons
+  const text=el("p",{class:"ur story-text"});
+  const card=el("div",{class:"wordcard"}); card.hidden=true;
+  pg.s.forEach((sent,i)=>{
+    const span=el("span",{class:"sent","data-i":i});
+    sent.split(" ").forEach((tok,ti)=>{
+      if(ti) span.append(" ");
+      const bare=tok.replace(/[۔!؟،]/g,""), w=st.words[bare];
+      if(!w){ span.append(tok); return; }
+      const b=el("span",{class:"tap",role:"button",tabindex:"0","aria-label":`${w.r}: ${w.en}`},bare);
+      b.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); b.click(); } };
+      b.onclick=()=>{ stopReading(); text.querySelectorAll(".tap").forEach(n=>n.classList.remove("active")); b.classList.add("active");
+        card.innerHTML=`<span class="ur big">${bare}</span><span class="roman">${w.r}</span><span>${w.en}</span><span class="ur urmean">${w.ur}</span>`;
+        card.hidden=false; play(w.key,bare); };
+      span.append(b);
+      if(tok!==bare) span.append(tok.slice(bare.length));
+    });
+    text.append(span);
+  });
+  const english=el("p",{class:"english"},pg.en); english.hidden=!state.showEn;
+
+  const tools=el("div",{class:"row"});
+  const readBtn=el("button",{class:"btn primary"},"Read to me");
+  const enBtn=el("button",{class:"btn"}, state.showEn?"Hide English":"Show English");
+  readBtn.onclick=()=>readPage(st,state.page,text);
+  enBtn.onclick=()=>{ state.showEn=!state.showEn; english.hidden=!state.showEn; enBtn.textContent=state.showEn?"Hide English":"Show English"; };
+  tools.append(readBtn,enBtn);
+
+  // page navigation: next is on the left, as Urdu books turn that way
+  const nav=el("div",{class:"story-nav"});
+  const last=state.page===st.pages.length-1;
+  const next=el("button",{class:"btn primary"}, last?"Finish":"Next page");
+  const back=el("button",{class:"btn"},"Back"); back.disabled=state.page===0;
+  const dots=el("div",{class:"dots","aria-label":`Page ${state.page+1} of ${st.pages.length}`});
+  st.pages.forEach((_,i)=>dots.append(el("span",{class:i===state.page?"on":""})));
+  next.onclick=()=>{ stopReading();
+    if(last){ addStar(); p.querySelector(".story-nav").replaceWith(el("p",{class:"done-msg"},"شاباش! Well done, you finished the story. ★")); return; }
+    state.page++; render(); };
+  back.onclick=()=>{ stopReading(); state.page--; render(); };
+  nav.append(next,dots,back);
+
+  p.append(text,english,card,tools,nav);
+}
+let readToken=0;
+function stopReading(){ readToken++; stopAudio(); document.querySelectorAll(".sent.reading").forEach(n=>n.classList.remove("reading")); }
+function readPage(st,pi,text){
+  stopReading(); const my=readToken; const sents=st.pages[pi].s;
+  const step=i=>{
+    text.querySelectorAll(".sent").forEach(n=>n.classList.toggle("reading", +n.dataset.i===i));
+    if(i>=sents.length||my!==readToken) return;
+    play(sentKey(st,pi,i), sents[i], ()=>{ if(my===readToken) setTimeout(()=>step(i+1),250); });
+  };
+  step(0);
 }
 
 /* ---------- font toggle ---------- */
@@ -444,6 +606,8 @@ function setFont(naskh){
   $("#f-nast").setAttribute("aria-pressed",String(!naskh)); $("#f-naskh").setAttribute("aria-pressed",String(naskh));
   store.set("hs.naskh",naskh); render();
 }
+function setMode(m){ stopAudio(); if(typeof stopReading==="function") stopReading(); state.mode=m; state.game=null; store.set("hs.mode",m); render(); window.scrollTo({top:0}); }
+$("#m-letters").onclick=()=>setMode("letters"); $("#m-stories").onclick=()=>setMode("stories");
 $("#f-nast").onclick=()=>setFont(false); $("#f-naskh").onclick=()=>setFont(true);
 if(store.get("hs.naskh",false)) document.documentElement.classList.add("naskh"),
   $("#f-nast").setAttribute("aria-pressed","false"), $("#f-naskh").setAttribute("aria-pressed","true");
