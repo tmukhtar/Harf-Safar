@@ -180,7 +180,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: letter lessons 1–6 and one story. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 17.</p>
+  <p class="note">Prototype: letter lessons 1–6 and one story. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 18.</p>
 </div>
 
 <script>
@@ -241,7 +241,7 @@ const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.na
 /* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
    Web Audio also keeps playing allowed on phones after the first tap. */
 // Bump this whenever audio files change, so phones fetch the new recordings.
-const AUDIO_VERSION="17";
+const AUDIO_VERSION="18";
 let ctx=null, current=null, playToken=0;
 const buffers={};   // key -> Promise<AudioBuffer|null>
 // On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
@@ -266,6 +266,12 @@ function preloadLesson(i){
   // letters from earlier lessons appear in the game too
   LESSONS.slice(0,i).forEach(l=>l.letters.forEach(x=>loadClip(keyLetter(x))));
 }
+// Say so when a sound file is missing, instead of staying silent.
+function showMissing(key){
+  const w=document.getElementById("voiceWarn"); if(!w) return;
+  w.textContent=`A sound is missing from this copy of the site (${key}.mp3). Check the audio folder was uploaded.`;
+  w.hidden=false; clearTimeout(showMissing.t); showMissing.t=setTimeout(()=>{ w.hidden=true; },6000);
+}
 function stopAudio(){
   playToken++;
   try{ if(current){ current.onended=null; current.stop(); } }catch(e){}
@@ -277,7 +283,7 @@ function play(key,text,next){
   loadClip(key).then(buf=>{
     if(token!==playToken) return;            // something newer was asked for
     const c=audioCtx();
-    if(!buf||!c){ speak(text); if(next) setTimeout(()=>{ if(token===playToken) next(); },1300); return; }
+    if(!buf||!c){ if(!speak(text)) showMissing(key); if(next) setTimeout(()=>{ if(token===playToken) next(); },1300); return; }
     const src=c.createBufferSource(); src.buffer=buf; src.connect(c.destination);
     src.onended=()=>{ if(current===src){ current=null; if(next && token===playToken) next(); } };
     current=src; src.start(0);
