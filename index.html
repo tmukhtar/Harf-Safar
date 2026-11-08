@@ -56,11 +56,12 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
 .seg button{border:0;background:transparent;padding:6px 12px;font-size:.85rem;font-weight:700;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 
-.lessons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lessons{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.lessons .lesson-btn{flex:0 0 86px;scroll-snap-align:start}
 .lesson-btn{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 6px;
   display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
 .lesson-btn small{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.lesson-btn .ur{font-size:1.25rem;line-height:1.9}
+.lesson-btn .ur{font-size:1.25rem;line-height:1.9;white-space:nowrap}
 .lesson-btn[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
 
 .steps{display:flex;gap:6px;flex-wrap:wrap}
@@ -180,7 +181,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:1/1;border-radius:18px;background
 
   <section class="panel" id="panel" aria-live="polite"></section>
 
-  <p class="note">Prototype: letter lessons 1–6 and one story. Pictures are placeholders. Audio is a generated Pakistani Urdu voice, to be replaced by human recordings. Version 19.</p>
+  <p class="note">All 15 letter lessons and one story, read by Tauseef. Pictures are placeholders. Version 20.</p>
 </div>
 
 <script>
@@ -209,7 +210,53 @@ const LESSONS = [
   { letters:[
       {g:"ت", name:"te", say:"تے", sound:"t (soft t)", joins:true, pic:{w:"تتلی", m:"butterfly", e:"🦋"}},
       {g:"ٹ", id:"tte", name:"ṭe", say:"ٹے", sound:"ṭ (hard t)", joins:true, pic:{w:"ٹماٹر", m:"tomato", e:"🍅"}} ],
-    words:[{w:"بات", r:"baat", m:"talk"},{id:"ttab", w:"ٹب", r:"ṭab", m:"tub"},{w:"پتا", r:"pata", m:"address"},{id:"battwa", w:"بٹوا", r:"baṭwa", m:"purse"}] }
+    words:[{w:"بات", r:"baat", m:"talk"},{id:"ttab", w:"ٹب", r:"ṭab", m:"tub"},{w:"پتا", r:"pata", m:"address"},{id:"battwa", w:"بٹوا", r:"baṭwa", m:"purse"}] },
+  { letters:[
+      {g:"م", name:"meem", say:"میم", sound:"m", joins:true, pic:{w:"مچھلی", m:"fish", e:"🐟"}},
+      {g:"ن", name:"noon", say:"نون", sound:"n", joins:true, pic:{w:"ناک", m:"nose", e:"👃"}},
+      {g:"ں", id:"noon-ghunna", name:"noon ghunna", say:"نون غنہ", sound:"nasal n", pic:{w:"ماں", m:"mother", e:"👩"}} ],
+    words:[{key:"pic-mango", w:"آم", r:"aam", m:"mango"},{w:"نام", r:"naam", m:"name"},{key:"pic-mother", w:"ماں", r:"maan", m:"mother"},{w:"نانا", r:"nana", m:"grandpa (mum's father)"},{w:"مٹر", r:"maṭar", m:"peas"},{w:"دن", r:"din", m:"day"}] },
+  { letters:[
+      {g:"س", name:"seen", say:"سین", sound:"s", joins:true, pic:{w:"سیب", m:"apple", e:"🍎"}},
+      {g:"ش", name:"sheen", say:"شین", sound:"sh", joins:true, pic:{w:"شیر", m:"lion", e:"🦁"}} ],
+    words:[{w:"بس", r:"bas", m:"bus / enough"},{w:"سب", r:"sab", m:"all"},{w:"شام", r:"shaam", m:"evening"},{w:"سانپ", r:"saanp", m:"snake"},{w:"دس", r:"das", m:"ten"}] },
+  { letters:[
+      {g:"ک", name:"kaaf", say:"کاف", sound:"k", joins:true, pic:{w:"کیلا", m:"banana", e:"🍌"}},
+      {g:"گ", name:"gaaf", say:"گاف", sound:"g", joins:true, pic:{w:"گاجر", m:"carrot", e:"🥕"}},
+      {g:"ل", name:"laam", say:"لام", sound:"l", joins:true, pic:{w:"لٹو", m:"spinning top", e:"🌀"}} ],
+    words:[{w:"لال", r:"laal", m:"red"},{w:"کان", r:"kaan", m:"ear"},{w:"گانا", r:"gaana", m:"song"},{w:"گول", r:"gol", m:"round"},{w:"کل", r:"kal", m:"tomorrow / yesterday"}] },
+  { letters:[
+      {g:"ی", id:"ye", name:"choti ye", say:"چھوٹی یے", sound:"y, ee", joins:true, pic:{w:"بلی", m:"cat", e:"🐱"}},
+      {g:"ے", id:"bari-ye", name:"bari ye", say:"بڑی یے", sound:"e (end of word)", pic:{w:"انڈے", m:"eggs", e:"🥚"}} ],
+    words:[{w:"امی", r:"ammi", m:"mum"},{key:"pic-apple", w:"سیب", r:"seb", m:"apple"},{key:"pic-lion", w:"شیر", r:"sher", m:"lion"},{w:"بیٹا", r:"beṭa", m:"son"},{w:"میز", r:"mez", m:"table"},{w:"دے", r:"de", m:"give"}] },
+  { letters:[
+      {g:"ہ", id:"he", name:"choti he", say:"چھوٹی ہے", sound:"h", joins:true, pic:{w:"ہاتھی", m:"elephant", e:"🐘"}},
+      {g:"ھ", id:"do-chashmi-he", name:"do chashmi he", say:"دو چشمی ہے", sound:"h after a letter (بھ، گھ)", joins:true, pic:{w:"بھالو", m:"bear", e:"🐻"}} ],
+    words:[{w:"ہم", r:"ham", m:"we"},{w:"گھر", r:"ghar", m:"house"},{w:"دودھ", r:"doodh", m:"milk"},{w:"ہاتھ", r:"haath", m:"hand"},{id:"yeh-mera-ghar-hai", w:"یہ میرا گھر ہے", r:"yeh mera ghar hai", m:"this is my house"}] },
+  { letters:[
+      {g:"ج", name:"jeem", say:"جیم", sound:"j", joins:true, pic:{w:"جہاز", m:"ship", e:"🚢"}},
+      {g:"چ", name:"che", say:"چے", sound:"ch", joins:true, pic:{w:"چڑیا", m:"bird", e:"🐦"}},
+      {g:"ح", id:"bari-he", name:"bari he", say:"بڑی حے", sound:"h", joins:true, pic:{w:"حلوہ", m:"halwa", e:"🍮"}},
+      {g:"خ", name:"khe", say:"خے", sound:"kh", joins:true, pic:{w:"خرگوش", m:"rabbit", e:"🐇"}} ],
+    words:[{w:"آج", r:"aaj", m:"today"},{w:"چاند", r:"chaand", m:"moon"},{w:"خوش", r:"khush", m:"happy"},{w:"بچہ", r:"bachcha", m:"child"},{key:"pic-halwa", w:"حلوہ", r:"halwa", m:"halwa"}] },
+  { letters:[
+      {g:"ف", name:"fe", say:"فے", sound:"f", joins:true, pic:{w:"فوارہ", m:"fountain", e:"⛲"}},
+      {g:"ق", name:"qaaf", say:"قاف", sound:"q", joins:true, pic:{w:"قلم", m:"pen", e:"🖊️"}} ],
+    words:[{key:"pic-pen", w:"قلم", r:"qalam", m:"pen"},{w:"فون", r:"fon", m:"phone"},{w:"برف", r:"barf", m:"snow / ice"},{w:"فرش", r:"farsh", m:"floor"}] },
+  { letters:[
+      {g:"ع", name:"ain", say:"عین", sound:"(silent / vowel)", joins:true, pic:{w:"عینک", m:"glasses", e:"👓"}},
+      {g:"غ", name:"ghain", say:"غین", sound:"gh", joins:true, pic:{w:"غبارہ", m:"balloon", e:"🎈"}} ],
+    words:[{w:"باغ", r:"baagh", m:"garden"},{key:"pic-glasses", w:"عینک", r:"ainak", m:"glasses"},{key:"pic-balloon", w:"غبارہ", r:"ghubbaara", m:"balloon"},{w:"علی", r:"Ali", m:"Ali (a name)"}] },
+  { letters:[
+      {g:"ص", name:"swaad", say:"صاد", sound:"s", joins:true, pic:{w:"صابن", m:"soap", e:"🧼"}},
+      {g:"ط", id:"toe", name:"to'e", say:"طوئے", sound:"t", joins:true, pic:{w:"طوطا", m:"parrot", e:"🦜"}},
+      {g:"ث", name:"se", say:"ثے", sound:"s", joins:true},
+      {g:"ذ", name:"zaal", say:"ذال", sound:"z"},
+      {g:"ض", name:"zwaad", say:"ضاد", sound:"z", joins:true},
+      {g:"ظ", id:"zoe", name:"zo'e", say:"ظوئے", sound:"z", joins:true},
+      {g:"ژ", name:"zhe", say:"ژے", sound:"zh"},
+      {g:"ء", name:"hamza", say:"ہمزہ", sound:"(a pause / glottal stop)"} ],
+    words:[{key:"pic-soap", w:"صابن", r:"saabun", m:"soap"},{key:"pic-parrot", w:"طوطا", r:"tota", m:"parrot"},{w:"ذرا", r:"zara", m:"a little"},{w:"ضرور", r:"zaroor", m:"surely"}] }
 ];
 const STEPS = ["Meet","Trace","Play","Read"];
 const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
@@ -237,11 +284,11 @@ if("speechSynthesis" in window){
 /* Audio files come first (audio/<key>.mp3, same on every phone);
    the device voice is only a fallback while files are missing. */
 const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>"pic-"+slug(x.pic.m), keyWord=w=>"word-"+(w.id||slug(w.r));
+const keyLetter=x=>x.viaWord ? "pic-"+slug(x.pic.m) : "letter-"+(x.id||slug(x.name)), keyPic=x=>x.pic ? "pic-"+slug(x.pic.m) : null, keyWord=w=>w.key||("word-"+(w.id||slug(w.r)));
 /* Sounds are downloaded once per lesson and kept in memory, so taps play instantly.
    Web Audio also keeps playing allowed on phones after the first tap. */
 // Bump this whenever audio files change, so phones fetch the new recordings.
-const AUDIO_VERSION="19";
+const AUDIO_VERSION="20";
 let ctx=null, current=null, playToken=0;
 const buffers={};   // key -> Promise<AudioBuffer|null>
 // On iPhone, mark this as media playback so the silent switch doesn't mute lessons.
@@ -261,7 +308,7 @@ function loadClip(key){
 }
 function preloadLesson(i){
   const L=LESSONS[i]; if(!L) return; loadClip("ding");
-  L.letters.forEach(x=>{ loadClip(keyLetter(x)); loadClip(keyPic(x)); });
+  L.letters.forEach(x=>{ loadClip(keyLetter(x)); if(x.pic) loadClip(keyPic(x)); });
   L.words.forEach(w=>loadClip(keyWord(w)));
   // letters from earlier lessons appear in the game too
   LESSONS.slice(0,i).forEach(l=>l.letters.forEach(x=>loadClip(keyLetter(x))));
@@ -311,7 +358,7 @@ function renderNav(){
   const ln=$("#lessons"); ln.innerHTML="";
   LESSONS.forEach((l,i)=>{
     const b=el("button",{class:"lesson-btn","aria-current":String(i===state.lesson)},
-      `<small>Lesson ${i+1}</small><span class="ur">${l.letters.map(x=>x.g).join(" ")}</span>`);
+      `<small>Lesson ${i+1}</small><span class="ur">${l.letters.length>4 ? l.letters.slice(0,3).map(x=>x.g).join(" ")+" …" : l.letters.map(x=>x.g).join(" ")}</span>`);
     b.onclick=()=>{ stopAudio(); state.lesson=i; state.step=0; state.traceIdx=0; state.game=null; store.set("hs.lesson",i); render(); };
     ln.appendChild(b);
   });
@@ -340,9 +387,9 @@ function renderMeet(p){
       `<span class="ur glyph">${x.g}</span><span class="name">${x.name}</span>
        <span class="hint">sound: ${x.sound}</span>
        ${x.joins ? shapes(x.g) : ""}
-       <span class="pic"><span class="emo" aria-hidden="true">${x.pic.e}</span><span class="ur">${x.pic.w}</span><span>${x.pic.m}</span></span>`);
+       ${x.pic ? `<span class="pic"><span class="emo" aria-hidden="true">${x.pic.e}</span><span class="ur">${x.pic.w}</span><span>${x.pic.m}</span></span>` : ""}`);
     c.onclick=()=>{ grid.querySelectorAll(".lcard").forEach(n=>n.classList.remove("playing")); c.classList.add("playing");
-      if(x.viaWord) play(keyPic(x),x.pic.w); else play(keyLetter(x),x.say,()=>play(keyPic(x),x.pic.w)); };
+      if(x.viaWord) play(keyPic(x),x.pic.w); else play(keyLetter(x),x.say, x.pic ? ()=>play(keyPic(x),x.pic.w) : null); };
     grid.appendChild(c);
   });
   p.append(grid, nextBtn("Trace them"));
@@ -462,7 +509,7 @@ function nextLessonBtn(){ const r=el("div",{class:"row"});
   if(state.lesson<LESSONS.length-1){ const b=el("button",{class:"btn primary"},`Go to lesson ${state.lesson+2}`);
     b.onclick=()=>{ state.lesson++; state.step=0; state.traceIdx=0; store.set("hs.lesson",state.lesson); render(); window.scrollTo({top:0}); };
     r.appendChild(b);
-  } else r.appendChild(el("p",{class:"hint"},"That's the end of the prototype for now. More letters are coming soon."));
+  } else r.appendChild(el("p",{class:"hint"},"That's every letter! Try a story next: tap Stories at the top."));
   return r; }
 
 function render(){
